@@ -1,0 +1,53 @@
+experiment:
+  name: cifar10_nesterov_signflipping_krum_noniid_byz0p2
+  seed: 42
+  log_level: INFO
+  save_path: results/noniid/cifar10_alpha=0.3/cifar10_nesterov_signflipping_krum_noniid_byz0p2
+dataset:
+  batch_size: 32
+  train:
+    class_path: fl_framework.data.datasets.CIFAR10Dataset
+    params:
+      data_dir: data_cache
+      train: true
+  test:
+    class_path: fl_framework.data.datasets.CIFAR10Dataset
+    params:
+      data_dir: data_cache
+      train: false
+  partition:
+    iid: false
+    alpha: 0.5
+    seed: 42
+model:
+  class_path: fl_framework.components.models.resnet_18_for_10.ResNet18For10
+  params:
+    in_channels: 3
+training:
+  rounds: 100
+  round_steps: 60
+  train_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  test_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  metrics:
+  - class_path: fl_framework.utils.metrics.TopKAccuracy
+    params:
+      k: 1
+optimizer:
+  class_path: fl_framework.components.optimizers.sgd-nesterov.SGDNesterov
+  params:
+    lr: 0.005
+    momentum: 0.95
+    weight_decay: 0.005
+aggregator:
+  class_path: fl_framework.components.aggregators.krum.KrumAggregator
+  params:
+    num_byzantine: 8
+honest:
+  num_clients: 32
+byzantine:
+  num_clients: 8
+  attack:
+    class_path: fl_framework.components.attacks.sign_flipping.SignFlipping
+    params: {}

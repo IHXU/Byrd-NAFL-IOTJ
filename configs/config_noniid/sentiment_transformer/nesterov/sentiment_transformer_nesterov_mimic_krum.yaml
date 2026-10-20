@@ -1,0 +1,63 @@
+experiment:
+  name: sentiment_transformer_nesterov_mimic_krum_noniid
+  seed: 42
+  log_level: INFO
+  save_path: results/noniid/sentiment_transformer_alpha0.3/sentiment_transformer_nesterov_mimic_krum_noniid
+dataset:
+  batch_size: 32
+  train:
+    class_path: fl_framework.data.datasets.Sentiment140Dataset
+    params:
+      data_file: data_cache/sentiment140/training.1600000.processed.noemoticon.csv
+      train: true
+      max_len: 128
+      vocab_file: data_cache/sentiment140/vocab.pt
+      tokenizer_type: simple
+  test:
+    class_path: fl_framework.data.datasets.Sentiment140Dataset
+    params:
+      data_file: data_cache/sentiment140/testdata.manual.2009.06.14.csv
+      train: false
+      max_len: 128
+      vocab_file: data_cache/sentiment140/vocab.pt
+      tokenizer_type: simple
+  partition:
+    iid: false
+    alpha: 0.5
+    seed: 42
+model:
+  class_path: fl_framework.components.models.sentiment_transformer.SentimentTransformer
+  params:
+    vocab_size: 30002
+    d_model: 256
+    nhead: 4
+    num_layers: 2
+    num_classes: 2
+training:
+  rounds: 100
+  round_steps: 60
+  train_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  test_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  metrics:
+  - class_path: fl_framework.utils.metrics.TopKAccuracy
+    params:
+      k: 1
+optimizer:
+  class_path: fl_framework.components.optimizers.sgd-nesterov.SGDNesterov
+  params:
+    lr: 0.005
+    momentum: 0.85
+    weight_decay: 0.005
+aggregator:
+  class_path: fl_framework.components.aggregators.krum.KrumAggregator
+  params:
+    num_byzantine: 6
+honest:
+  num_clients: 14
+byzantine:
+  num_clients: 6
+  attack:
+    class_path: fl_framework.components.attacks.mimic.Mimic
+    params: {}

@@ -1,0 +1,52 @@
+experiment:
+  name: mnist_nesterov_signflipping_krum_noniid_byz0.3
+  seed: 42
+  log_level: INFO
+  save_path: results/mnist_nesterov_signflipping_krum_noniid_byz0.3
+dataset:
+  batch_size: 50
+  train:
+    class_path: fl_framework.data.datasets.MNISTDataset
+    params:
+      data_dir: data_cache
+      train: true
+  test:
+    class_path: fl_framework.data.datasets.MNISTDataset
+    params:
+      data_dir: data_cache
+      train: false
+  partition:
+    iid: false
+    alpha: 0.1
+    seed: 42
+model:
+  class_path: fl_framework.components.models.lenet5.LeNet5
+  params: {}
+training:
+  rounds: 100
+  round_steps: 20
+  train_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  test_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  metrics:
+  - class_path: fl_framework.utils.metrics.TopKAccuracy
+    params:
+      k: 1
+optimizer:
+  class_path: fl_framework.components.optimizers.sgd-nesterov.SGDNesterov
+  params:
+    lr: 0.01
+    momentum: 0.95
+    weight_decay: 0.005
+aggregator:
+  class_path: fl_framework.components.aggregators.krum.KrumAggregator
+  params:
+    num_byzantine: 150
+honest:
+  num_clients: 350
+byzantine:
+  num_clients: 150
+  attack:
+    class_path: fl_framework.components.attacks.sign_flipping.SignFlipping
+    params: {}

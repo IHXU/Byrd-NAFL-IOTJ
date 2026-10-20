@@ -1,0 +1,51 @@
+experiment:
+  name: mnist_nesterov_labelflipping_krum_iid_byz0.4
+  seed: 42
+  log_level: INFO
+  save_path: results/iid/mnist_nesterov_labelflipping_krum_iid_byz0.4
+dataset:
+  batch_size: 50
+  train:
+    class_path: fl_framework.data.datasets.MNISTDataset
+    params:
+      data_dir: data_cache
+      train: true
+  test:
+    class_path: fl_framework.data.datasets.MNISTDataset
+    params:
+      data_dir: data_cache
+      train: false
+  partition:
+    iid: true
+    seed: 42
+model:
+  class_path: fl_framework.components.models.lenet5.LeNet5
+  params: {}
+training:
+  rounds: 100
+  round_steps: 20
+  train_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  test_loss_function:
+    class_path: torch.nn.CrossEntropyLoss
+  metrics:
+  - class_path: fl_framework.utils.metrics.TopKAccuracy
+    params:
+      k: 1
+optimizer:
+  class_path: fl_framework.components.optimizers.sgd-nesterov.SGDNesterov
+  params:
+    lr: 0.01
+    momentum: 0.95
+    weight_decay: 0.005
+aggregator:
+  class_path: fl_framework.components.aggregators.krum.KrumAggregator
+  params:
+    num_byzantine: 200
+honest:
+  num_clients: 300
+byzantine:
+  num_clients: 200
+  attack:
+    class_path: fl_framework.components.attacks.label_flipping.LabelFlipping
+    params: {}
